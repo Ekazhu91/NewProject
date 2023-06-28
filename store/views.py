@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from django.db.models import OuterRef, Subquery, F, ExpressionWrapper, DecimalField, Case, When
 from django.utils import timezone
-from store.models import Product, Cart
+from store.models import Product, Cart, Wishlist
 from rest_framework import viewsets, response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import CartSerializer
@@ -242,3 +242,26 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_item = self.get_queryset().get(id=kwargs['pk'])
         cart_item.delete()
         return response.Response({'message': 'Product delete from cart'}, status=201)
+
+
+class WishlistView(View):
+    # def get_queryset(self):
+    #     return self.queryset.filter(user=self.request.user)
+
+    def get(self, request):
+        if request.user.is_authenticated:
+
+                # код который необходим для обработчика
+            return render(request, "store/wishlist.html")
+            # Иначе отправляет авторизироваться
+        return redirect('login:login')  # from django.shortcuts import redirect
+
+    # def create(self, request, *args, **kwargs):
+    #     wishlist_items = self.get_queryset().filter(product__id=request.data.get('product'))
+    #     if request.data.get('quantity'):
+    #         wishlist_items.quantity = request.data['quantity']
+    #     if request.data.get('product'):
+    #         product = get_object_or_404(Product, id=request.data['product'])
+    #         wishlist_items.product = product
+    #     wishlist_items.save()
+    #     return response.Response({'message': 'Product change to wishlist'}, status=201)
