@@ -5,7 +5,7 @@ from django.utils import timezone
 from store.models import Product, Cart, Wishlist
 from rest_framework import viewsets, response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CartSerializer
+from .serializers import CartSerializer, WishlistSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -245,23 +245,27 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
 class WishlistView(View):
-    # def get_queryset(self):
-    #     return self.queryset.filter(user=self.request.user)
 
     def get(self, request):
         if request.user.is_authenticated:
-
+            pr = Wishlist.objects.filter(user=request.user)
                 # код который необходим для обработчика
-            return render(request, "store/wishlist.html")
+            return render(request, "store/wishlist.html", {"data": pr})
             # Иначе отправляет авторизироваться
         return redirect('login:login')  # from django.shortcuts import redirect
 
+
+class WishlistViewSet(viewsets.ModelViewSet):
+    queryset = Wishlist.objects.all()
+    serializer_class = WishlistSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
     # def create(self, request, *args, **kwargs):
     #     wishlist_items = self.get_queryset().filter(product__id=request.data.get('product'))
-    #     if request.data.get('quantity'):
-    #         wishlist_items.quantity = request.data['quantity']
-    #     if request.data.get('product'):
-    #         product = get_object_or_404(Product, id=request.data['product'])
-    #         wishlist_items.product = product
     #     wishlist_items.save()
     #     return response.Response({'message': 'Product change to wishlist'}, status=201)
+
+
